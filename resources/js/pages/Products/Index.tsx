@@ -77,6 +77,7 @@ export default function Index({ products }: Props) {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created At</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
@@ -86,8 +87,27 @@ export default function Index({ products }: Props) {
                                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                             {product.description || 'No description'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">${product.price}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">৳{product.price}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{product.created_at}</td>
+                                        <td className='border border-gray-300 dark:border-gray-700 px-4 py-2'>
+                                            <div className='flex gap-2'>
+                                                <Link
+                                                    href={`/products/${product.id}/edit`}
+                                                    className='text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300'
+                                                >
+                                                    Edit
+                                                </Link>
+                                                <Link
+                                                    href={`/products/${product.id}`}
+                                                    method="delete"
+                                                    as="button"
+                                                    className='text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300'
+                                                    onBefore={() => confirm('Are you sure you want to delete this post?')}
+                                                >
+                                                    Delete
+                                                </Link>
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
