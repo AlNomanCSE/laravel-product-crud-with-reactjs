@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Products',
@@ -24,8 +25,13 @@ interface Flash {
     success?: string | null;
 }
 
+interface Filters {
+    search?: string | null;
+}
+
 interface Props {
     products: Product[];
+    filters: Filters;
     auth?: {
         user: {
             name: string;
@@ -34,19 +40,38 @@ interface Props {
     flash?: Flash;
 }
 
-export default function Index({ products }: Props) {
+export default function Index({ products, filters }: Props) {
     const { props } = usePage<{ flash?: Flash }>();
     const [showSuccess, setShowSuccess] = useState(false);
+    const [search, setSearch] = useState(filters.search || '');
+
     useEffect(() => {
         if (props.flash?.success) {
             setShowSuccess(true);
             const timer = setTimeout(() => {
                 setShowSuccess(false);
-            }, 5000); // 5 seconds
+            }, 5000);
 
             return () => clearTimeout(timer);
         }
     }, [props.flash?.success]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get('/products', { search }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleClearSearch = () => {
+        setSearch('');
+        router.get('/products', {}, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
@@ -60,20 +85,55 @@ export default function Index({ products }: Props) {
                         </AlertDescription>
                     </Alert>
                 )}
-                <div className="flex justify-between items-center mb-4">
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Products</h1>
-                    <Link href="/products/create">
-                        <Button>Create Product</Button>
-                    </Link>
+                    
+                    {/* Search Bar */}
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <form onSubmit={handleSearch} className="flex gap-2 flex-1 sm:flex-initial">
+                            <div className="relative flex-1 sm:w-64">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Search products..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                                />
+                            </div>
+                            <Button type="submit" variant="outline">
+                                Search
+                            </Button>
+                            {search && (
+                                <Button type="button" variant="outline" onClick={handleClearSearch}>
+                                    Clear
+                                </Button>
+                            )}
+                        </form>
+                        <Link href="/products/create">
+                            <Button>Create Product</Button>
+                        </Link>
+                    </div>
                 </div>
+
+                {search && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Searching for: <span className="font-semibold">{search}</span> 
+                        {products.length > 0 && ` - Found ${products.length} result(s)`}
+                    </p>
+                )}
+
                 {products.length === 0 ? (
-                    <p className="text-gray-600 dark:text-gray-400">No products available.</p>
+                    <p className="text-gray-600 dark:text-gray-400">
+                        {search ? `No products found matching "${search}".` : 'No products available.'}
+                    </p>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead className="bg-gray-50 dark:bg-gray-800">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product Name</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created At</th>
@@ -118,4 +178,3 @@ export default function Index({ products }: Props) {
         </AppLayout>
     );
 }
-

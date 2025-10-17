@@ -68,7 +68,7 @@ export default function EditProduct({ product }: Props) {
                     >
                         Back to Products
                     </Link>
-                    
+
                     {/* Display Success Message */}
                     {showSuccess && props.flash?.success && (
                         <Alert className="mb-4 border-green-500 bg-green-50 dark:bg-green-900/20">
@@ -131,9 +131,9 @@ export default function EditProduct({ product }: Props) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className='w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 transition duration-200 text-lg'
+                            className='w-full px-4 py-2 bg-amber-400 text-white rounded-md hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-200 text-lg'
                         >
-                            Update Product
+                            {processing ? ' Updaing ...' : ' Update Post'}
                         </button>
                     </form>
                 </div>

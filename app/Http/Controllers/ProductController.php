@@ -8,21 +8,42 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::all()->map(function ($product) {
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'description' => $product->description,
-                'price' => number_format($product->price, 2),
-                'created_at' => $product->created_at->format('Y-m-d'),
-            ];
-        });
-
+        $search = $request->input('search');
+        $products = Product::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->get()
+            ->map(function ($product) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'price' => number_format($product->price, 2),
+                    'created_at' => $product->created_at->format('Y-m-d'),
+                ];
+            });
         return Inertia::render('Products/Index', [
             'products' => $products,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
+        // $products = Product::all()->map(function ($product) {
+        //     return [
+        //         'id' => $product->id,
+        //         'name' => $product->name,
+        //         'description' => $product->description,
+        //         'price' => number_format($product->price, 2),
+        //         'created_at' => $product->created_at->format('Y-m-d'),
+        //     ];
+        // });
+
+        // return Inertia::render('Products/Index', [
+        //     'products' => $products,
+        // ]);
     }
 
     public function create()
