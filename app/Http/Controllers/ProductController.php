@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -22,6 +23,10 @@ class ProductController extends Controller
                     'name' => $product->name,
                     'description' => $product->description,
                     'price' => number_format($product->price, 2),
+                    'category' => $product->category ? [
+                        'id' => $product->category->id,
+                        'name' => $product->category->name,
+                    ] : null,
                     'created_at' => $product->created_at->format('Y-m-d'),
                 ];
             });
@@ -48,27 +53,32 @@ class ProductController extends Controller
 
     public function create()
     {
-        return Inertia::render('Products/Create');
+        $categories = Category::all(['id', 'name'])->toArray();
+        return Inertia::render('Products/Create', ['categories' => $categories]);
     }
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|min:0'
+            'price' => 'required|min:0',
+            'category_id' => 'required|exists:categories,id',
         ]);
         Product::create($validated);
         return redirect('/products')->with('success', 'Product created successfully.');
     }
     public function edit(Product $product)
     {
+        $categories = Category::all(['id', 'name'])->toArray();
         return Inertia::render('Products/Edit', [
             'product' => [
                 'id' => $product->id,
                 'name' => $product->name,
                 'description' => $product->description,
                 'price' => $product->price,
-            ]
+                'category_id' => $product->category_id,
+            ],
+            'categories' => $categories,
         ]);
     }
     public function update(Request $request, Product $product)
@@ -76,7 +86,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric|min:0'
+            'price' => 'required|numeric|min:0',
+            'category_id' => 'required|exists:categories,id',
         ]);
 
         $product->update($validated);
